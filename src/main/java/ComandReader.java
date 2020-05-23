@@ -38,6 +38,12 @@ public class ComandReader {
                     case "/commit":
                         CheckoutComand.addCommit("");
                         break;
+                    case "/fetch":
+                        FetchCommand.fetch();
+                        break;
+                    case "/push":
+                        Branch.pushBranch();
+                        break;
                     case "/exit":
                         System.exit(0);
                         break;

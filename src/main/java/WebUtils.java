@@ -6,6 +6,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -13,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 class WebUtils {
@@ -20,6 +22,7 @@ class WebUtils {
         public String path;
         public File file;
     }
+
 
     static String getRequest(String url) throws Exception {
         String result = "";
@@ -53,14 +56,18 @@ class WebUtils {
         //Так, тут  я получил список всех файлов содержашихся в каталоге
         Login userInfo = Login.getInstance();
         Branch UserBranchInfo = Branch.getInstance();
+        //Тут создаю хеш для отправки
+
         for (SendingFile sendingFile : allFiles) {
+
             try {
                 uploadFile(sendingFile.file,
                         sendingFile.file.getName(),
                         userInfo.login,
                         UserBranchInfo.curentBranch,
                         sendingFile.path,
-                        comment);
+                        comment,
+                        Integer.toString(Calendar.getInstance().get(Calendar.MILLISECOND)));
             } catch (IOException e) {
                 System.out.println("Не могу послать файл:" + sendingFile.file.getName());
                 e.printStackTrace();
@@ -68,7 +75,7 @@ class WebUtils {
         }
     }
 
-    public static void uploadFile(File file, String fileOfName, String userName, String branch, String path, String comment) throws IOException {
+    public static void uploadFile(File file, String fileOfName, String userName, String branch, String path, String comment, String hash) throws IOException {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
         builder.addTextBody("nameOfFile", fileOfName);
@@ -76,8 +83,7 @@ class WebUtils {
         builder.addTextBody("branch", branch);
         builder.addTextBody("path", path);
         builder.addTextBody("comment", comment);
-        builder.addTextBody("hash", Integer.toString(comment.hashCode()));
-
+        builder.addTextBody("hash", hash);
 
         ContentType fileContentType = ContentType.create("text/html");
         String fileName = file.getName();
@@ -92,4 +98,22 @@ class WebUtils {
 
         HttpResponse response = client.execute(request);
     }
+
+    public static String fetchFilesRequest(String userName, String branch) throws IOException {
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+        builder.addTextBody("userName", userName);
+        builder.addTextBody("branch", branch);
+
+        HttpEntity entity = builder.build();
+
+        HttpPost request = new HttpPost("http://localhost:8080/getFilesFromBranch");
+        request.setEntity(entity);
+
+        HttpClient client = HttpClients.createDefault();
+
+        HttpResponse response = client.execute(request);
+        return new BasicResponseHandler().handleResponse(response);
+    }
+
 }

@@ -30,6 +30,12 @@ public class Branch {
         }
     }
 
+    public static void pushBranch() {
+        Branch branch = Branch.getInstance();
+        if (branch.curentBranch != null) {
+            WebUtils.sendAllFilesToServerFromPath(FilesUtils.getCurrentWorkedPath() + "\\work", branch.allCommits);
+        }
+    }
 
     public static void getLastSettings() throws IOException {
         setSettings(FilesUtils.readSettingsFile().split("\n"));

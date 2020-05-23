@@ -16,7 +16,7 @@ class FilesUtils {
         writeFile(getCurrentWorkedPath() + "\\.StankinSettings.st", text);
     }
 
-    static void writeFile(String path, String text) {
+    public static void writeFile(String path, String text) {
         try (FileWriter writer = new FileWriter(path, false)) {
             writer.write(text);
             writer.flush();
@@ -77,5 +77,10 @@ class FilesUtils {
         return allFiles;
     }
 
+
+    public static void makePathToFile(String path) {
+        File file = new File(path);
+        file.getParentFile().mkdirs();
+    }
 
 }
